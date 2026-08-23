@@ -4,9 +4,9 @@ import { Menu, SlidersHorizontal, MapPin, Info, RotateCcw, X, Heart, MessageCirc
 import './styles.css';
 
 const flowers = [
-  {name:'Blue Rose', origin:'Ecuador', tagline:'Mysterious and unique.', quote:'I stand for the impossible.', image:'/assets/blue-rose.png', tone:'#89badd', tags:['Elegant','Mysterious','One of a kind'], match:98},
-  {name:'Blush Peony', origin:'France', tagline:'Soft, joyful and timeless.', quote:'I bloom at my own pace.', image:'/assets/blush-peony.png', tone:'#f59aae', tags:['Romantic','Warm','Dreamy'], match:94},
-  {name:'Moon Orchid', origin:'Thailand', tagline:'Quietly extraordinary.', quote:'Beauty lives in the details.', image:'/assets/moon-orchid.png', tone:'#b99adf', tags:['Rare','Calm','Graceful'], match:91}
+  {name:'Blue Rose', origin:'Ecuador', tagline:'Mysterious and unique.', quote:'I stand for the impossible.', image:'/assets/blue-rose.webp', tone:'#89badd', tags:['Elegant','Mysterious','One of a kind'], match:98},
+  {name:'Blush Peony', origin:'France', tagline:'Soft, joyful and timeless.', quote:'I bloom at my own pace.', image:'/assets/blush-peony.webp', tone:'#f59aae', tags:['Romantic','Warm','Dreamy'], match:94},
+  {name:'Moon Orchid', origin:'Thailand', tagline:'Quietly extraordinary.', quote:'Beauty lives in the details.', image:'/assets/moon-orchid.webp', tone:'#b99adf', tags:['Rare','Calm','Graceful'], match:91}
 ];
 
 function IconButton({children, label, className='', onClick}) { return <button aria-label={label} className={`icon-btn ${className}`} onClick={onClick}>{children}</button> }
@@ -49,7 +49,7 @@ function App(){
     <section className="deck">
     <div className="back-card one"/><div className="back-card two"/>
     <div key={`preview-${index}`} className="preview-card" aria-hidden="true" style={{transform:`translateY(${8-reveal*8}px) scale(${.96+reveal*.04})`}}>
-      <img src={upcoming.image} alt=""/><div className="veil"/>
+      <img src={upcoming.image} alt="" loading="eager" decoding="sync" fetchPriority="high"/><div className="veil"/>
       <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <div className="info"><Info size={20}/></div>
       <aside><div><Flower2/><span>Rare</span></div><div><Sun/><span>Loves Sun</span></div><div><Droplets/><span>Medium<br/>Water</span></div></aside>
@@ -58,7 +58,7 @@ function App(){
     </div>
     <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
       style={{transform:`translateX(${drag.x}px) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .33s cubic-bezier(.2,.72,.2,1), opacity .27s ease':drag.start===null?'transform .36s cubic-bezier(.2,.72,.2,1)':'none'}}>
-      <img src={flower.image} alt={flower.name}/><div className="veil"/>
+      <img src={flower.image} alt={flower.name} loading="eager" decoding="sync" fetchPriority="high"/><div className="veil"/>
       {Math.abs(drag.x)>35&&<div className={`stamp ${drag.x>0?'yes':'no'}`}>{drag.x>0?'BLOOM':'PASS'}</div>}
       <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <button className="info"><Info size={20}/></button>
