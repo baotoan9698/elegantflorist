@@ -66,3 +66,5 @@ html{background-color:#a9dcf5!important}body{background-color:#a9dcf5!important}
 /* Blue swipe hint */
 .shell .hint{color:#238fb7;text-shadow:0 1px 8px rgba(255,255,255,.7)}
 @media (max-width:699px){body{background:linear-gradient(180deg,#a9dcf5 0%,#cceff5 48%,#ebfaea calc(100% - 110px),#fff 100%)!important;background-image:linear-gradient(180deg,#a9dcf5 0%,#cceff5 48%,#ebfaea calc(100% - 110px),#fff 100%)!important}.shell{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+/* Final two-color page gradient */
+body{background:linear-gradient(180deg,#a9dcf5 0%,#fff 100%)!important;background-image:linear-gradient(180deg,#a9dcf5 0%,#fff 100%)!important;background-size:100% 100%!important;background-repeat:no-repeat!important;background-attachment:fixed!important}
