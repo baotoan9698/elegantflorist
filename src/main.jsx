@@ -20,11 +20,11 @@ function App(){
  const next=(kind='skip')=>{
   if(animating)return;
   const direction=kind==='like'?1:-1;
-  setAnimating(true);setNotice(kind==='like'?'A beautiful match!':'Discovering another bloom…');setLiked(kind==='like');
+  setAnimating(true);setNotice('');setLiked(false);
   setDrag({x:direction*560,start:null});
   setTimeout(()=>{
    setIndex(v=>v+1);setDrag({x:0,start:null});setAnimating(false);setLiked(false);setNotice('');
-  },720);
+  },340);
  };
  useEffect(()=>{
   const handleKey=e=>{
@@ -42,11 +42,11 @@ function App(){
    <div className="ambient a1"/><div className="ambient a2"/>
    <header>
     <IconButton label="Open menu"><Menu/></IconButton>
-    <div className="brand"><div>bloom<span>❧</span></div><small>Match. Grow. Bloom.</small></div>
+    <div className="brand"><img className="brand-logo" src="/assets/elegant-florist-logo.png" alt="Elégant Florist" /></div>
     <IconButton label="Filters"><SlidersHorizontal/></IconButton>
    </header>
-   <section className="intro intro-empty" aria-hidden="true" />
-   <section className="deck">
+   <section className="main-stage">
+    <section className="deck">
     <div className="back-card one"/><div className="back-card two"/>
     <div key={`preview-${index}`} className="preview-card" aria-hidden="true" style={{transform:`translateY(${8-reveal*8}px) scale(${.96+reveal*.04})`}}>
       <img src={upcoming.image} alt=""/><div className="veil"/>
@@ -57,7 +57,7 @@ function App(){
       <div className="score"><Flower2/><b>{upcoming.match}%</b><span>Match</span></div>
     </div>
     <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-      style={{transform:`translateX(${drag.x}px) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .7s cubic-bezier(.16,.7,.2,1), opacity .58s ease':drag.start===null?'transform .48s cubic-bezier(.16,.7,.2,1)':'none'}}>
+      style={{transform:`translateX(${drag.x}px) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .33s cubic-bezier(.2,.72,.2,1), opacity .27s ease':drag.start===null?'transform .36s cubic-bezier(.2,.72,.2,1)':'none'}}>
       <img src={flower.image} alt={flower.name}/><div className="veil"/>
       {Math.abs(drag.x)>35&&<div className={`stamp ${drag.x>0?'yes':'no'}`}>{drag.x>0?'BLOOM':'PASS'}</div>}
       <div className="badge"><span>✿</span><b>{flower.name}</b><small>Rare & Elegant</small></div>
@@ -66,23 +66,26 @@ function App(){
       <div className="card-copy"><h1>{flower.name}<Sparkles/></h1><p className="origin"><MapPin/> {flower.origin}</p><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{flower.match}%</b><span>Match</span></div>
     </article>
+    </section>
+    <div className="hint">Swipe to discover<br/>your perfect bloom <span>↝</span></div>
    </section>
-   <div className="hint">Swipe to discover<br/>your perfect bloom <span>↝</span></div>
-   <section className="actions">
+   <footer className="bottom-zone">
+    <section className="actions">
     <IconButton label="Undo" onClick={()=>setIndex(v=>Math.max(0,v-1))}><RotateCcw/></IconButton>
     <IconButton label="Pass" onClick={()=>next('skip')}><X/></IconButton>
     <IconButton label="Bloom" className={`primary ${liked?'liked':''}`} onClick={()=>next('like')}><Flower2 fill="white"/></IconButton>
     <IconButton label="Like" onClick={()=>next('like')}><Heart fill="currentColor"/></IconButton>
     <IconButton label="Message"><MessageCircle fill="currentColor"/></IconButton>
-   </section>
-   <nav className="ios-glass-nav">
+    </section>
+    <nav className="ios-glass-nav">
     <span className="glass-shine" aria-hidden="true" />
     <button className={activeTab==='discover'?'active':''} onClick={()=>setActiveTab('discover')}><span className="nav-icon"><Flower2 fill="currentColor"/></span><span>Discover</span></button>
     <button className={activeTab==='garden'?'active':''} onClick={()=>setActiveTab('garden')}><span className="nav-icon"><Gift/></span><span>Garden</span></button>
     <button className={activeTab==='matches'?'active':''} onClick={()=>setActiveTab('matches')}><span className="nav-icon"><Heart/></span><i>12</i><span>Matches</span></button>
     <button className={activeTab==='messages'?'active':''} onClick={()=>setActiveTab('messages')}><span className="nav-icon"><MessageCircle/></span><i>3</i><span>Messages</span></button>
     <button className={activeTab==='profile'?'active':''} onClick={()=>setActiveTab('profile')}><span className="nav-icon"><UserRound/></span><span>Profile</span></button>
-   </nav>
+    </nav>
+   </footer>
    {notice&&<div className="toast">{notice}</div>}
  </main>
 }
