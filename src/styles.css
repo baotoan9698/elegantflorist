@@ -74,3 +74,18 @@ html,body{background:#fff!important;background-image:none!important}#root{positi
 nav.ios-glass-nav{background:rgba(230,248,253,.62)!important;border-color:rgba(255,255,255,.9)!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.98),inset 0 -1px 1px rgba(32,145,181,.1),0 10px 24px rgba(31,133,166,.12)!important}nav.ios-glass-nav:after{display:block;background:rgba(69,184,219,.12)!important}nav.ios-glass-nav .glass-shine{display:block;background:radial-gradient(ellipse at 20% 0,rgba(255,255,255,.98),transparent 45%),linear-gradient(105deg,transparent 15%,rgba(151,220,241,.3) 48%,transparent 75%)!important}.ios-glass-nav button:before{background:radial-gradient(circle at 30% 12%,rgba(255,255,255,.9),transparent 44%),linear-gradient(120deg,rgba(144,216,239,.2),transparent 55%)!important}.ios-glass-nav button:not(.active):hover{color:#168db9!important;background:rgba(201,238,249,.5)!important;border-color:rgba(255,255,255,.72)!important;box-shadow:inset 0 1px 1px white,0 5px 14px rgba(31,145,182,.13)!important}.ios-glass-nav button.active,.ios-glass-nav button.active:hover{color:#168db9!important;background:rgba(205,241,251,.78)!important;border-color:rgba(255,255,255,.88)!important;box-shadow:inset 0 1px 1px white,0 6px 15px rgba(31,145,182,.15)!important}.ios-glass-nav button.active .nav-icon{color:#168db9!important;background:rgba(219,247,253,.62)!important;box-shadow:inset 0 1px 1px white,0 3px 9px rgba(31,145,182,.1)!important}
 /* Navigation variant without outer glow */
 nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inset 0 1px 1px rgba(255,255,255,.98),inset 0 -1px 1px rgba(32,145,181,.1)!important}
+/* Desktop-only app frame */
+@media (min-width:700px){.shell{border:1px solid rgba(255,255,255,.72)!important;border-radius:38px!important;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(205,239,249,.08))!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.92),inset 0 -1px 1px rgba(45,148,181,.09),0 22px 60px rgba(33,118,148,.16)!important;backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%)}}
+@media (min-width:700px){.shell{transform:translateY(15px);padding-top:10px!important;padding-bottom:10px!important}}
+@media (min-width:700px){.shell{padding-bottom:0!important}.shell .hint{transform:translateY(5px)}.bottom-zone{transform:translateY(-15px)}}
+@media (min-width:700px){.bottom-zone{margin-bottom:-10px}.shell nav.ios-glass-nav{top:-8px!important}}
+@media (min-width:700px){.shell nav.ios-glass-nav{top:-15px!important}}
+@media (min-width:700px){.bottom-zone{margin-bottom:-10px}}
+
+/* PC APP FRAME SIZE — edit these two values */
+@media (min-width:700px){
+  .shell{
+    width:min(560px,calc(100vw - 40px))!important; /* horizontal */
+    height:min(900px,calc(100dvh - 30px))!important; /* vertical */
+  }
+}
