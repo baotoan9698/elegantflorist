@@ -50,20 +50,20 @@ function App(){
     <div className="back-card one"/><div className="back-card two"/>
     <div key={`preview-${index}`} className="preview-card" aria-hidden="true" style={{transform:`translateY(${8-reveal*8}px) scale(${.96+reveal*.04})`}}>
       <img src={upcoming.image} alt=""/><div className="veil"/>
-      <div className="badge"><span>✿</span><b>{upcoming.name}</b><small>Rare & Elegant</small></div>
+      <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <div className="info"><Info size={20}/></div>
       <aside><div><Flower2/><span>Rare</span></div><div><Sun/><span>Loves Sun</span></div><div><Droplets/><span>Medium<br/>Water</span></div></aside>
-      <div className="card-copy"><h1>{upcoming.name}<Sparkles/></h1><p className="origin"><MapPin/> {upcoming.origin}</p><p>{upcoming.tagline}<br/>{upcoming.quote}</p><div className="tags">{upcoming.tags.map(t=><span key={t}>{t}</span>)}</div></div>
+      <div className="card-copy"><p className="origin"><MapPin/> {upcoming.origin}</p><h1>{upcoming.name}<Sparkles/></h1><p>{upcoming.tagline}<br/>{upcoming.quote}</p><div className="tags">{upcoming.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{upcoming.match}%</b><span>Match</span></div>
     </div>
     <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
       style={{transform:`translateX(${drag.x}px) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .33s cubic-bezier(.2,.72,.2,1), opacity .27s ease':drag.start===null?'transform .36s cubic-bezier(.2,.72,.2,1)':'none'}}>
       <img src={flower.image} alt={flower.name}/><div className="veil"/>
       {Math.abs(drag.x)>35&&<div className={`stamp ${drag.x>0?'yes':'no'}`}>{drag.x>0?'BLOOM':'PASS'}</div>}
-      <div className="badge"><span>✿</span><b>{flower.name}</b><small>Rare & Elegant</small></div>
+      <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <button className="info"><Info size={20}/></button>
       <aside><div><Flower2/><span>Rare</span></div><div><Sun/><span>Loves Sun</span></div><div><Droplets/><span>Medium<br/>Water</span></div></aside>
-      <div className="card-copy"><h1>{flower.name}<Sparkles/></h1><p className="origin"><MapPin/> {flower.origin}</p><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
+      <div className="card-copy"><p className="origin"><MapPin/> {flower.origin}</p><h1>{flower.name}<Sparkles/></h1><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{flower.match}%</b><span>Match</span></div>
     </article>
     </section>
