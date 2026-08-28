@@ -62,7 +62,7 @@ function App(){
  const [index,setIndex]=useState(0), [liked,setLiked]=useState(false), [notice,setNotice]=useState(''), [animating,setAnimating]=useState(false);
  const [activeTab,setActiveTab]=useState('discover');
  const [detailItem,setDetailItem]=useState(()=>flowerFromPath()), [detailPhoto,setDetailPhoto]=useState(0), [detailDrag,setDetailDrag]=useState({x:0,start:null});
- const [drag,setDrag]=useState({x:0,start:null}); const pointer=useRef(null); const flower=flowers[index%flowers.length];
+ const [drag,setDrag]=useState({x:0,start:null}); const pointer=useRef(null), didDrag=useRef(false); const flower=flowers[index%flowers.length];
  const upcoming=flowers[(index+1)%flowers.length]; const reveal=Math.min(Math.abs(drag.x)/210,1);
  const detailFlower=detailItem?flowerDetail(detailItem):null;
  const detailGallery=detailFlower?[detailFlower.image,...flowers.filter(item=>item.image!==detailFlower.image).map(item=>item.image)]:[];
@@ -96,8 +96,8 @@ function App(){
   window.addEventListener('keydown',handleKey);
   return()=>window.removeEventListener('keydown',handleKey);
  },[animating,detailItem,detailPhoto]);
- const down=e=>{if(animating)return;pointer.current=e.pointerId;e.currentTarget.setPointerCapture(e.pointerId);setDrag({x:0,start:e.clientX})};
- const move=e=>{if(drag.start!==null)setDrag(d=>({...d,x:e.clientX-d.start}))};
+ const down=e=>{if(animating)return;didDrag.current=false;pointer.current=e.pointerId;e.currentTarget.setPointerCapture(e.pointerId);setDrag({x:0,start:e.clientX})};
+ const move=e=>{if(drag.start!==null){if(Math.abs(e.clientX-drag.start)>8)didDrag.current=true;setDrag(d=>({...d,x:e.clientX-d.start}))}};
  const up=()=>{if(drag.start===null)return;if(Math.abs(drag.x)>75)next(drag.x>0?'like':'skip');else setDrag({x:0,start:null});pointer.current=null};
  return <main className="shell">
    <div className="ambient a1"/><div className="ambient a2"/>
@@ -118,14 +118,14 @@ function App(){
       <div className="card-copy"><p className="origin"><MapPin/> {upcoming.origin}</p><h1>{upcoming.name}<Sparkles/></h1><p>{upcoming.tagline}<br/>{upcoming.quote}</p><div className="tags">{upcoming.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{upcoming.match}%</b><span>Match</span></div>
     </div>
-    <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+    <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onClick={()=>{if(!didDrag.current&&!animating)openDetail(flower)}}
       style={{transform:`translate3d(${drag.x}px,0,0) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .75s cubic-bezier(.16,.74,.18,1), opacity .68s ease':drag.start===null?'transform .58s cubic-bezier(.16,.74,.18,1)':'none'}}>
       <img src={flower.image} alt={flower.name} loading="eager" decoding="sync" fetchpriority="high"/><div className="veil"/>
       {Math.abs(drag.x)>35&&<div className={`stamp ${drag.x>0?'yes':'no'}`}>{drag.x>0?'BLOOM':'PASS'}</div>}
       <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <button className="info"><Info size={20}/></button>
       <aside><div><Flower2/><span>Rare</span></div><div><Sun/><span>Loves Sun</span></div><div><Droplets/><span>Medium<br/>Water</span></div></aside>
-      <div className="card-copy"><p className="origin"><MapPin/> {flower.origin}</p><button className="discover-detail-trigger" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();openDetail(flower)}}><h1>{flower.name}<Sparkles/></h1></button><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
+      <div className="card-copy"><p className="origin"><MapPin/> {flower.origin}</p><h1>{flower.name}<Sparkles/></h1><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{flower.match}%</b><span>Match</span></div>
     </article>
     </section>
@@ -157,10 +157,10 @@ function App(){
       <img key={`${detailFlower.name}-${detailPhoto}`} className={detailDrag.start!==null?'dragging':''} src={detailGallery[detailPhoto]} alt={`${detailFlower.name} - ảnh ${detailPhoto+1}`} style={{transform:`translate3d(${detailDrag.x}px,0,0)`}} />
       <div className="detail-image-shade" />
       <div className="detail-title"><span><MapPin/> {detailFlower.origin}</span><h2>{detailFlower.name}<Sparkles/></h2></div>
+      <div className="detail-dots">{detailGallery.map((_,i)=><button key={i} className={i===detailPhoto?'active':''} aria-label={`Xem ảnh ${i+1}`} onClick={()=>setDetailPhoto(i)} />)}</div>
      </div>
      <button className="detail-arrow previous" aria-label="Ảnh trước" onClick={()=>changeDetailPhoto(-1)}><ChevronLeft/></button>
      <button className="detail-arrow next" aria-label="Ảnh tiếp theo" onClick={()=>changeDetailPhoto(1)}><ChevronRight/></button>
-     <div className="detail-dots">{detailGallery.map((_,i)=><button key={i} className={i===detailPhoto?'active':''} aria-label={`Xem ảnh ${i+1}`} onClick={()=>setDetailPhoto(i)} />)}</div>
      <section className="detail-copy">
       <p className="detail-lead">{detailFlower.tagline} {detailFlower.quote}</p>
       <div className="detail-tags">{detailFlower.tags.map(tag=><span key={tag}>{tag}</span>)}</div>
