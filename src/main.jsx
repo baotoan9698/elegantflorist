@@ -138,18 +138,18 @@ function App(){
       <div className="score"><Flower2/><b>{flower.match}%</b><span>Match</span></div>
     </article>
     </section>
-    <div className="hint">Swipe to discover<br/>your perfect bloom <span>↝</span></div>
    </>}
    </section>
-   <footer className={`bottom-zone ${activeTab==='garden'?'nav-only':''}`}>
+   <footer className={`bottom-zone ${activeTab==='garden'?'nav-only':'discover-zone'}`}>
     {activeTab!=='garden'&&
+    <><div className="hint">Swipe to discover<br/>your perfect bloom <span>↝</span></div>
     <section className="actions">
     <IconButton label="Undo" onClick={()=>setIndex(v=>Math.max(0,v-1))}><RotateCcw/></IconButton>
     <IconButton label="Pass" onClick={()=>next('skip')}><X/></IconButton>
     <IconButton label="Bloom" className={`primary ${liked?'liked':''}`} onClick={()=>next('like')}><Flower2 fill="white"/></IconButton>
     <IconButton label="Like" onClick={()=>next('like')}><Heart fill="currentColor"/></IconButton>
     <IconButton label="Message"><MessageCircle fill="currentColor"/></IconButton>
-    </section>}
+    </section></>}
     <nav className="ios-glass-nav">
     <span className="glass-shine" aria-hidden="true" />
     <button className={activeTab==='discover'?'active':''} onClick={()=>setActiveTab('discover')}><span className="nav-icon"><Flower2 fill="currentColor"/></span><span>Discover</span></button>

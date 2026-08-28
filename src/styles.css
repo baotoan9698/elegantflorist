@@ -411,6 +411,33 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 /* One consistent ratio for every product image across the app */
 .shell .deck,.product-tile,.gallery-track,.detail-gallery{aspect-ratio:3/4!important}
 
+/* Equal spacing: swipe hint ↔ action menu ↔ main navigation */
+.bottom-zone.discover-zone{gap:10px!important}
+.bottom-zone.discover-zone .hint{
+  position:static!important;
+  margin:0!important;
+  transform:none!important;
+}
+.bottom-zone.discover-zone .actions{transform:none!important}
+.bottom-zone.discover-zone .ios-glass-nav{top:auto!important}
+
+/* Instagram-style Garden grid: independent tiles, never overlapping */
+.product-grid{
+  grid-auto-rows:max-content!important;
+  align-items:start!important;
+  gap:4px!important;
+}
+.product-tile{
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  align-self:start!important;
+  border:0!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
 /* Desktop: enlarge the complete hero card group by 20% */
 @media (min-width:700px){
   .shell .deck{
