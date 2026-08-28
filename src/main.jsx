@@ -22,23 +22,22 @@ const gardenProducts = [
 ];
 
 const gardenCategories = ['Tất cả','Hoa Hồng','Hoa Mix','Hoa Lan','Hoa Cưới','Hoa Chúc Mừng'];
+const flowerSlug=name=>name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const allFlowerEntries=[...flowers,...gardenProducts];
+const flowerDetail=item=>{
+ const source=flowers.find(flower=>flower.image===item.image)||flowers[0];
+ return {...source,...item,tags:item.tags||source.tags,origin:item.origin||source.origin,tagline:item.tagline||source.tagline,quote:item.quote||source.quote};
+};
+const flowerFromPath=()=>{
+ const slug=window.location.pathname.match(/^\/flowers\/([^/]+)\/?$/)?.[1];
+ return slug?allFlowerEntries.find(item=>flowerSlug(item.name)===slug)||null:null;
+};
 
 function IconButton({children, label, className='', onClick}) { return <button aria-label={label} className={`icon-btn ${className}`} onClick={onClick}>{children}</button> }
 
-function Garden(){
+function Garden({onOpenProduct}){
  const [category,setCategory]=useState('Tất cả');
- const [selected,setSelected]=useState(null);
- const [photoIndex,setPhotoIndex]=useState(0);
- const [galleryDrag,setGalleryDrag]=useState({x:0,start:null});
  const products=category==='Tất cả'?gardenProducts:gardenProducts.filter(item=>item.category===category);
- const gallery=selected?[selected.image,...flowers.filter(item=>item.image!==selected.image).map(item=>item.image)]:[];
- const changePhoto=direction=>setPhotoIndex(current=>(current+direction+gallery.length)%gallery.length);
- const openProduct=product=>{setSelected(product);setPhotoIndex(0);setGalleryDrag({x:0,start:null})};
- const galleryUp=()=>{
-  if(galleryDrag.start===null)return;
-  if(Math.abs(galleryDrag.x)>45)changePhoto(galleryDrag.x<0?1:-1);
-  setGalleryDrag({x:0,start:null});
- };
  return <section className="garden-view">
    <div className="garden-heading">
     <div><span>Our collection</span><h1>Garden</h1></div>
@@ -48,7 +47,7 @@ function Garden(){
     {gardenCategories.map(item=><button key={item} className={category===item?'active':''} onClick={()=>setCategory(item)}>{item}</button>)}
    </div>
    <div className="product-grid">
-    {products.map((item,i)=><article className="product-tile" key={`${item.name}-${i}`} onClick={()=>openProduct(item)} tabIndex="0" onKeyDown={e=>{if(e.key==='Enter')openProduct(item)}}>
+    {products.map((item,i)=><article className="product-tile" key={`${item.name}-${i}`} onClick={()=>onOpenProduct(item)} tabIndex="0" onKeyDown={e=>{if(e.key==='Enter')onOpenProduct(item)}}>
       <img src={item.image} alt={item.name} style={{objectPosition:item.position}} loading="eager" />
       <div className="product-gradient" />
       <button className="product-like" aria-label={`Yêu thích ${item.name}`}><Heart/></button>
@@ -56,26 +55,22 @@ function Garden(){
       <button className="product-cart" aria-label={`Thêm ${item.name} vào giỏ`}><ShoppingBag/></button>
     </article>)}
    </div>
-   {selected&&<div className="product-modal" role="dialog" aria-modal="true" aria-label={`Thư viện ảnh ${selected.name}`} onClick={()=>setSelected(null)}>
-    <div className="product-modal-card" onClick={e=>e.stopPropagation()}>
-     <button className="modal-close" aria-label="Đóng thư viện" onClick={()=>setSelected(null)}><X/></button>
-     <div className="gallery-track" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);setGalleryDrag({x:0,start:e.clientX})}} onPointerMove={e=>galleryDrag.start!==null&&setGalleryDrag(d=>({...d,x:e.clientX-d.start}))} onPointerUp={galleryUp} onPointerCancel={galleryUp}>
-      <img key={`${selected.name}-${photoIndex}`} className={galleryDrag.start!==null?'dragging':''} src={gallery[photoIndex]} alt={`${selected.name} - ảnh ${photoIndex+1}`} style={{transform:`translate3d(${galleryDrag.x}px,0,0)`}} />
-     </div>
-     <button className="gallery-arrow previous" aria-label="Ảnh trước" onClick={()=>changePhoto(-1)}><ChevronLeft/></button>
-     <button className="gallery-arrow next" aria-label="Ảnh tiếp theo" onClick={()=>changePhoto(1)}><ChevronRight/></button>
-     <div className="gallery-dots">{gallery.map((_,i)=><button key={i} className={i===photoIndex?'active':''} aria-label={`Xem ảnh ${i+1}`} onClick={()=>setPhotoIndex(i)} />)}</div>
-     <div className="modal-product-info"><div><span>{selected.category}</span><h2>{selected.name}</h2><p>{selected.price}</p></div><button><ShoppingBag/><span>Thêm vào giỏ</span></button></div>
-    </div>
-   </div>}
   </section>
 }
 
 function App(){
  const [index,setIndex]=useState(0), [liked,setLiked]=useState(false), [notice,setNotice]=useState(''), [animating,setAnimating]=useState(false);
  const [activeTab,setActiveTab]=useState('discover');
+ const [detailItem,setDetailItem]=useState(()=>flowerFromPath()), [detailPhoto,setDetailPhoto]=useState(0), [detailDrag,setDetailDrag]=useState({x:0,start:null});
  const [drag,setDrag]=useState({x:0,start:null}); const pointer=useRef(null); const flower=flowers[index%flowers.length];
  const upcoming=flowers[(index+1)%flowers.length]; const reveal=Math.min(Math.abs(drag.x)/210,1);
+ const detailFlower=detailItem?flowerDetail(detailItem):null;
+ const detailGallery=detailFlower?[detailFlower.image,...flowers.filter(item=>item.image!==detailFlower.image).map(item=>item.image)]:[];
+ const changeDetailPhoto=direction=>setDetailPhoto(current=>(current+direction+detailGallery.length)%detailGallery.length);
+ const detailUp=()=>{if(detailDrag.start===null)return;if(Math.abs(detailDrag.x)>45)changeDetailPhoto(detailDrag.x<0?1:-1);setDetailDrag({x:0,start:null})};
+ const openDetail=item=>{setDetailItem(item);setDetailPhoto(0);setDetailDrag({x:0,start:null});window.history.pushState({},'',`/flowers/${flowerSlug(item.name)}`)};
+ const closeDetail=()=>{setDetailItem(null);setDetailPhoto(0);window.history.pushState({},'','/')};
+ useEffect(()=>{const onPopState=()=>{setDetailItem(flowerFromPath());setDetailPhoto(0)};window.addEventListener('popstate',onPopState);return()=>window.removeEventListener('popstate',onPopState)},[]);
  useEffect(()=>{flowers.forEach(item=>{const image=new Image();image.src=item.image})},[]);
  const next=(kind='skip')=>{
   if(animating)return;
@@ -89,12 +84,18 @@ function App(){
  useEffect(()=>{
   const handleKey=e=>{
    if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;
+   if(detailItem){
+    if(e.key==='Escape'){e.preventDefault();closeDetail()}
+    if(e.key==='ArrowLeft'){e.preventDefault();changeDetailPhoto(-1)}
+    if(e.key==='ArrowRight'){e.preventDefault();changeDetailPhoto(1)}
+    return;
+   }
    if(e.key==='ArrowLeft'){e.preventDefault();next('skip')}
    if(e.key==='ArrowRight'){e.preventDefault();next('like')}
   };
   window.addEventListener('keydown',handleKey);
   return()=>window.removeEventListener('keydown',handleKey);
- },[animating]);
+ },[animating,detailItem,detailPhoto]);
  const down=e=>{if(animating)return;pointer.current=e.pointerId;e.currentTarget.setPointerCapture(e.pointerId);setDrag({x:0,start:e.clientX})};
  const move=e=>{if(drag.start!==null)setDrag(d=>({...d,x:e.clientX-d.start}))};
  const up=()=>{if(drag.start===null)return;if(Math.abs(drag.x)>75)next(drag.x>0?'like':'skip');else setDrag({x:0,start:null});pointer.current=null};
@@ -106,7 +107,7 @@ function App(){
     <IconButton label="Filters"><SlidersHorizontal/></IconButton>
    </header>
    <section className={`main-stage ${activeTab==='garden'?'garden-stage':''}`}>
-   {activeTab==='garden'?<Garden/>:<>
+   {activeTab==='garden'?<Garden onOpenProduct={openDetail}/>:<>
     <section className="deck">
     <div className="back-card one"/><div className="back-card two"/>
     <div key={`preview-${index}`} className="preview-card" aria-hidden="true" style={{transform:`translateY(${8-reveal*8}px) scale(${.96+reveal*.04})`}}>
@@ -124,7 +125,7 @@ function App(){
       <div className="badge"><span>✿</span><b>Rare bloom</b></div>
       <button className="info"><Info size={20}/></button>
       <aside><div><Flower2/><span>Rare</span></div><div><Sun/><span>Loves Sun</span></div><div><Droplets/><span>Medium<br/>Water</span></div></aside>
-      <div className="card-copy"><p className="origin"><MapPin/> {flower.origin}</p><h1>{flower.name}<Sparkles/></h1><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
+      <div className="card-copy"><p className="origin"><MapPin/> {flower.origin}</p><button className="discover-detail-trigger" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();openDetail(flower)}}><h1>{flower.name}<Sparkles/></h1></button><p>{flower.tagline}<br/>{flower.quote}</p><div className="tags">{flower.tags.map(t=><span key={t}>{t}</span>)}</div></div>
       <div className="score"><Flower2/><b>{flower.match}%</b><span>Match</span></div>
     </article>
     </section>
@@ -149,6 +150,25 @@ function App(){
     <button className={activeTab==='profile'?'active':''} onClick={()=>setActiveTab('profile')}><span className="nav-icon"><UserRound/></span><span>Profile</span></button>
     </nav>
    </footer>
+   {detailFlower&&<div className="discover-detail" role="dialog" aria-modal="true" aria-label={`Chi tiết ${detailFlower.name}`} onClick={closeDetail}>
+    <article className="discover-detail-card" onClick={e=>e.stopPropagation()}>
+     <button className="detail-close" aria-label="Đóng chi tiết" onClick={closeDetail}><X/></button>
+     <div className="detail-gallery" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);setDetailDrag({x:0,start:e.clientX})}} onPointerMove={e=>detailDrag.start!==null&&setDetailDrag(d=>({...d,x:e.clientX-d.start}))} onPointerUp={detailUp} onPointerCancel={detailUp}>
+      <img key={`${detailFlower.name}-${detailPhoto}`} className={detailDrag.start!==null?'dragging':''} src={detailGallery[detailPhoto]} alt={`${detailFlower.name} - ảnh ${detailPhoto+1}`} style={{transform:`translate3d(${detailDrag.x}px,0,0)`}} />
+      <div className="detail-image-shade" />
+      <div className="detail-title"><span><MapPin/> {detailFlower.origin}</span><h2>{detailFlower.name}<Sparkles/></h2></div>
+     </div>
+     <button className="detail-arrow previous" aria-label="Ảnh trước" onClick={()=>changeDetailPhoto(-1)}><ChevronLeft/></button>
+     <button className="detail-arrow next" aria-label="Ảnh tiếp theo" onClick={()=>changeDetailPhoto(1)}><ChevronRight/></button>
+     <div className="detail-dots">{detailGallery.map((_,i)=><button key={i} className={i===detailPhoto?'active':''} aria-label={`Xem ảnh ${i+1}`} onClick={()=>setDetailPhoto(i)} />)}</div>
+     <section className="detail-copy">
+      <p className="detail-lead">{detailFlower.tagline} {detailFlower.quote}</p>
+      <div className="detail-tags">{detailFlower.tags.map(tag=><span key={tag}>{tag}</span>)}</div>
+      <div className="detail-facts"><div><Sun/><span>Ánh sáng</span><b>Nắng nhẹ</b></div><div><Droplets/><span>Tưới nước</span><b>Vừa phải</b></div><div><Flower2/><span>Độ hiếm</span><b>Rare bloom</b></div></div>
+      <button className="detail-action">{detailFlower.price?<ShoppingBag/>:<Heart fill="currentColor"/>}<span>{detailFlower.price?`${detailFlower.price} · Thêm vào giỏ`:'Chọn đóa hoa này'}</span></button>
+     </section>
+    </article>
+   </div>}
    {notice&&<div className="toast">{notice}</div>}
  </main>
 }
