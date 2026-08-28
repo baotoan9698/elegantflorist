@@ -406,4 +406,4 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   backface-visibility:hidden;
   transform-style:preserve-3d;
 }
-.deck,.gallery-track{contain:layout paint}
+.deck,.gallery-track{contain:layout style}
