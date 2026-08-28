@@ -60,7 +60,7 @@ function Garden(){
     <div className="product-modal-card" onClick={e=>e.stopPropagation()}>
      <button className="modal-close" aria-label="Đóng thư viện" onClick={()=>setSelected(null)}><X/></button>
      <div className="gallery-track" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);setGalleryDrag({x:0,start:e.clientX})}} onPointerMove={e=>galleryDrag.start!==null&&setGalleryDrag(d=>({...d,x:e.clientX-d.start}))} onPointerUp={galleryUp} onPointerCancel={galleryUp}>
-      <img key={`${selected.name}-${photoIndex}`} className={galleryDrag.start!==null?'dragging':''} src={gallery[photoIndex]} alt={`${selected.name} - ảnh ${photoIndex+1}`} style={{transform:`translateX(${galleryDrag.x}px)`}} />
+      <img key={`${selected.name}-${photoIndex}`} className={galleryDrag.start!==null?'dragging':''} src={gallery[photoIndex]} alt={`${selected.name} - ảnh ${photoIndex+1}`} style={{transform:`translate3d(${galleryDrag.x}px,0,0)`}} />
      </div>
      <button className="gallery-arrow previous" aria-label="Ảnh trước" onClick={()=>changePhoto(-1)}><ChevronLeft/></button>
      <button className="gallery-arrow next" aria-label="Ảnh tiếp theo" onClick={()=>changePhoto(1)}><ChevronRight/></button>
@@ -84,7 +84,7 @@ function App(){
   setDrag({x:direction*560,start:null});
  setTimeout(()=>{
    setIndex(v=>v+1);setDrag({x:0,start:null});setAnimating(false);setLiked(false);setNotice('');
-  },500);
+  },750);
  };
  useEffect(()=>{
   const handleKey=e=>{
@@ -118,7 +118,7 @@ function App(){
       <div className="score"><Flower2/><b>{upcoming.match}%</b><span>Match</span></div>
     </div>
     <article key={index} className="card" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-      style={{transform:`translateX(${drag.x}px) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .49s cubic-bezier(.18,.72,.18,1), opacity .43s ease':drag.start===null?'transform .46s cubic-bezier(.18,.72,.18,1)':'none'}}>
+      style={{transform:`translate3d(${drag.x}px,0,0) rotate(${drag.x/30}deg)`,opacity:Math.abs(drag.x)>360?.1:1,transition:drag.start===null&&animating?'transform .75s cubic-bezier(.16,.74,.18,1), opacity .68s ease':drag.start===null?'transform .58s cubic-bezier(.16,.74,.18,1)':'none'}}>
       <img src={flower.image} alt={flower.name} loading="eager" decoding="sync" fetchpriority="high"/><div className="veil"/>
       {Math.abs(drag.x)>35&&<div className={`stamp ${drag.x>0?'yes':'no'}`}>{drag.x>0?'BLOOM':'PASS'}</div>}
       <div className="badge"><span>✿</span><b>Rare bloom</b></div>

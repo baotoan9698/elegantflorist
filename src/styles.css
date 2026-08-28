@@ -384,11 +384,11 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   -webkit-overflow-scrolling:touch;
 }
 .preview-card{
-  transition:transform .48s cubic-bezier(.18,.72,.18,1)!important;
+  transition:transform .7s cubic-bezier(.16,.74,.18,1)!important;
 }
 .gallery-track img{
-  transition:transform .46s cubic-bezier(.18,.72,.18,1);
-  animation:gallery-image-in-smooth .46s cubic-bezier(.18,.72,.18,1) both;
+  transition:transform .75s cubic-bezier(.16,.74,.18,1);
+  animation:gallery-image-in-smooth .75s cubic-bezier(.16,.74,.18,1) both;
 }
 .gallery-track img.dragging{transition:none}
 @keyframes gallery-image-in-smooth{
@@ -399,3 +399,11 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   .product-grid,.garden-filters{scroll-behavior:auto}
   .gallery-track img{transition:none;animation:none}
 }
+
+/* GPU compositing for steadier swipe frame rates */
+.card,.preview-card,.gallery-track img,.product-tile img{
+  will-change:transform;
+  backface-visibility:hidden;
+  transform-style:preserve-3d;
+}
+.deck,.gallery-track{contain:layout paint}
