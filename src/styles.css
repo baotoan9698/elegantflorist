@@ -377,3 +377,25 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   .product-modal-card{width:min(92vw,390px)}
   .gallery-arrow{display:none}
 }
+
+/* Slower, smoother touch movement */
+.product-grid,.garden-filters{
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.preview-card{
+  transition:transform .48s cubic-bezier(.18,.72,.18,1)!important;
+}
+.gallery-track img{
+  transition:transform .46s cubic-bezier(.18,.72,.18,1);
+  animation:gallery-image-in-smooth .46s cubic-bezier(.18,.72,.18,1) both;
+}
+.gallery-track img.dragging{transition:none}
+@keyframes gallery-image-in-smooth{
+  from{opacity:.72;translate:14px 0}
+  to{opacity:1;translate:0 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .product-grid,.garden-filters{scroll-behavior:auto}
+  .gallery-track img{transition:none;animation:none}
+}
