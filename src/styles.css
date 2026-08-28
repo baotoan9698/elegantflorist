@@ -407,3 +407,16 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   transform-style:preserve-3d;
 }
 .deck,.gallery-track{contain:layout style}
+
+/* Desktop: enlarge the complete hero card group by 20% */
+@media (min-width:700px){
+  .shell .deck{
+    width:min(348px,calc((100dvh - 245px)*.7745))!important;
+  }
+  .card-copy h1,.preview-card .card-copy h1{font-size:41px}
+  .card-copy p:not(.origin),.preview-card .card-copy p:not(.origin){font-size:12px}
+  .card-copy .origin,.preview-card .card-copy .origin{font-size:11px}
+  .tags span{font-size:10px}
+  .card .badge b,.preview-card .badge b{font-size:12px}
+  .shell .hint{font-size:16px}
+}
