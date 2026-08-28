@@ -408,6 +408,9 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 }
 .deck,.gallery-track{contain:layout style}
 
+/* One consistent ratio for every product image across the app */
+.shell .deck,.product-tile,.gallery-track,.detail-gallery{aspect-ratio:3/4!important}
+
 /* Desktop: enlarge the complete hero card group by 20% */
 @media (min-width:700px){
   .shell .deck{
@@ -448,7 +451,7 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 }
 .discover-detail-card{
   position:relative;
-  width:min(100%,296px);
+  width:min(100%,340px);
   max-height:calc(100% - 24px);
   overflow:auto;
   border:1px solid rgba(255,255,255,.9);
@@ -483,7 +486,7 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 .detail-title{position:absolute;right:20px;bottom:30px;left:20px;color:white;text-shadow:0 2px 12px rgba(0,0,0,.28)}
 .detail-title span{display:inline-flex;align-items:center;gap:3px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.25);font-size:10px;font-weight:700;backdrop-filter:blur(10px)}
 .detail-title span svg{width:12px;height:12px;fill:white}
-.detail-title h2{display:flex;align-items:center;gap:5px;margin:6px 0 0;font-size:26px;line-height:1}
+.detail-title h2{display:flex;align-items:center;gap:5px;margin:6px 0 0;font-size:29px;line-height:1}
 .detail-title h2 svg{width:17px;height:17px}
 .detail-close,.detail-arrow{
   position:absolute;
@@ -518,6 +521,6 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 .detail-action svg{width:16px;height:16px}
 @media(max-width:699px){
   .discover-detail{position:fixed;padding:10px}
-  .discover-detail-card{width:min(78vw,296px);max-height:calc(100dvh - 20px)}
+  .discover-detail-card{width:min(88vw,340px);max-height:calc(100dvh - 20px)}
   .detail-arrow{display:none}
 }
