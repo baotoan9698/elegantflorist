@@ -2,6 +2,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import { createRoot } from 'react-dom/client';
 import { Menu, SlidersHorizontal, MapPin, Info, RotateCcw, X, Heart, MessageCircle, Gift, UserRound, Flower2, Droplets, Sun, Sparkles, Search, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import './styles.css';
+import Admin from './Admin';
+import {supabase, productView} from './supabase';
 
 const flowers = [
   {name:'Crimson Romance', origin:'Singapore', tagline:'Bold, timeless and devoted.', quote:'A grand gesture of true love.', image:'/assets/flower-samples/flower-09.jpg', tone:'#b82034', tags:['Romantic','Luxury','Roses'], match:98},
@@ -44,9 +46,10 @@ const flowerFromPath=()=>{
 
 function IconButton({children, label, className='', onClick}) { return <button aria-label={label} className={`icon-btn ${className}`} onClick={onClick}>{children}</button> }
 
-function Garden({onOpenProduct}){
+function Garden({onOpenProduct,items=gardenProducts}){
  const [category,setCategory]=useState('Tất cả');
- const products=category==='Tất cả'?gardenProducts:gardenProducts.filter(item=>item.category===category);
+ const products=category==='Tất cả'?items:items.filter(item=>item.category===category);
+ const gardenCategories=['Tất cả',...new Set(items.map(item=>item.category))];
  return <section className="garden-view">
    <div className="garden-heading">
     <div><span>Our collection</span><h1>Garden</h1></div>
@@ -67,19 +70,25 @@ function Garden({onOpenProduct}){
   </section>
 }
 
-function App(){
+const sampleFlowers=flowers;
+function App({catalog=null}){
+ const flowers=catalog?(catalog.some(item=>item.featured)?catalog.filter(item=>item.featured):catalog):sampleFlowers;
+ const flowerFromPath=()=>{
+  const slug=window.location.pathname.match(/^\/flowers\/([^/]+)\/?$/)?.[1];
+  return (catalog||allFlowerEntries).find(item=>(item.slug||flowerSlug(item.name))===slug)||null;
+ };
  const [index,setIndex]=useState(0), [liked,setLiked]=useState(false), [notice,setNotice]=useState(''), [animating,setAnimating]=useState(false);
  const [activeTab,setActiveTab]=useState('discover');
  const [detailItem,setDetailItem]=useState(()=>flowerFromPath()), [detailPhoto,setDetailPhoto]=useState(0), [detailDrag,setDetailDrag]=useState({x:0,start:null});
  const [drag,setDrag]=useState({x:0,start:null}); const pointer=useRef(null), didDrag=useRef(false); const flower=flowers[index%flowers.length];
  const upcoming=flowers[(index+1)%flowers.length]; const reveal=Math.min(Math.abs(drag.x)/210,1);
- const detailFlower=detailItem?flowerDetail(detailItem):null;
- const detailGallery=detailFlower?[detailFlower.image,...flowers.filter(item=>item.image!==detailFlower.image).map(item=>item.image)]:[];
+ const detailFlower=detailItem?(catalog?detailItem:flowerDetail(detailItem)):null;
+ const detailGallery=detailFlower?(detailFlower.images?.length?detailFlower.images:[detailFlower.image]):[];
  const changeDetailPhoto=direction=>setDetailPhoto(current=>(current+direction+detailGallery.length)%detailGallery.length);
  const detailUp=()=>{if(detailDrag.start===null)return;if(Math.abs(detailDrag.x)>45)changeDetailPhoto(detailDrag.x<0?1:-1);setDetailDrag({x:0,start:null})};
- const openDetail=item=>{setDetailItem(item);setDetailPhoto(0);setDetailDrag({x:0,start:null});window.history.pushState({},'',`/flowers/${flowerSlug(item.name)}`)};
+ const openDetail=item=>{setDetailItem(item);setDetailPhoto(0);setDetailDrag({x:0,start:null});window.history.pushState({},'',`/flowers/${item.slug||flowerSlug(item.name)}`)};
  const closeDetail=()=>{setDetailItem(null);setDetailPhoto(0);window.history.pushState({},'','/')};
- useEffect(()=>{const onPopState=()=>{setDetailItem(flowerFromPath());setDetailPhoto(0)};window.addEventListener('popstate',onPopState);return()=>window.removeEventListener('popstate',onPopState)},[]);
+ useEffect(()=>{const onPopState=()=>{setDetailItem(flowerFromPath());setDetailPhoto(0)};window.addEventListener('popstate',onPopState);return()=>window.removeEventListener('popstate',onPopState)},[catalog]);
  useEffect(()=>{flowers.forEach(item=>{const image=new Image();image.src=item.image})},[]);
  const next=(kind='skip')=>{
   if(animating)return;
@@ -116,7 +125,7 @@ function App(){
     <IconButton label="Filters"><SlidersHorizontal/></IconButton>
    </header>
    <section className={`main-stage ${activeTab==='garden'?'garden-stage':''}`}>
-   {activeTab==='garden'?<Garden onOpenProduct={openDetail}/>:<>
+   {activeTab==='garden'?<Garden onOpenProduct={openDetail} items={catalog||gardenProducts}/>:<>
     <section className="deck">
     <div className="back-card one"/><div className="back-card two"/>
     <div key={`preview-${index}`} className="preview-card" aria-hidden="true" style={{transform:`translateY(${8-reveal*8}px) scale(${.96+reveal*.04})`}}>
@@ -173,7 +182,7 @@ function App(){
      <section className="detail-copy">
       <p className="detail-lead">{detailFlower.tagline} {detailFlower.quote}</p>
       <div className="detail-tags">{detailFlower.tags.map(tag=><span key={tag}>{tag}</span>)}</div>
-      <div className="detail-facts"><div><Sun/><span>Ánh sáng</span><b>Nắng nhẹ</b></div><div><Droplets/><span>Tưới nước</span><b>Vừa phải</b></div><div><Flower2/><span>Độ hiếm</span><b>Rare bloom</b></div></div>
+      <div className="detail-facts"><div><Sun/><span>Ánh sáng</span><b>{detailFlower.light||'Chưa cập nhật'}</b></div><div><Droplets/><span>Tưới nước</span><b>{detailFlower.water||'Chưa cập nhật'}</b></div><div><Flower2/><span>Độ hiếm</span><b>{detailFlower.rarity||'Chưa cập nhật'}</b></div></div>
       <button className="detail-action">{detailFlower.price?<ShoppingBag/>:<Heart fill="currentColor"/>}<span>{detailFlower.price?`${detailFlower.price} · Thêm vào giỏ`:'Chọn đóa hoa này'}</span></button>
      </section>
     </article>
@@ -181,4 +190,17 @@ function App(){
    {notice&&<div className="toast">{notice}</div>}
  </main>
 }
-createRoot(document.getElementById('root')).render(<App/>);
+function Storefront(){
+ const [catalog,setCatalog]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(!!supabase);
+ async function load(){
+  if(!supabase)return;
+  setError('');
+  try{const {data,error}=await supabase.from('products').select('*').eq('published',true).order('created_at',{ascending:false});if(error)throw error;setCatalog(data.map(productView))}catch(error){setError(error.message)}finally{setLoading(false)}
+ }
+ useEffect(()=>{load();if(!supabase)return;const refresh=()=>load();window.addEventListener('focus',refresh);return()=>window.removeEventListener('focus',refresh)},[]);
+ if(loading)return <main className="catalog-status">Đang tải bộ sưu tập…</main>;
+ if(error)return <main className="catalog-status"><p>Không thể tải sản phẩm. Vui lòng thử lại.</p><button onClick={load}>Tải lại</button></main>;
+ if(catalog&&!catalog.length)return <main className="catalog-status"><h1>Elégant Florist</h1><p>Bộ sưu tập đang được cập nhật.</p><a href="/admin">Quản lý sản phẩm</a></main>;
+ return <App catalog={catalog}/>;
+}
+createRoot(document.getElementById('root')).render(window.location.pathname.startsWith('/admin')?<Admin/>:<Storefront/>);

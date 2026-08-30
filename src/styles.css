@@ -421,6 +421,7 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
 
 /* Keep the main navigation at the same bottom position on every tab */
 .bottom-zone.nav-only .ios-glass-nav{top:auto!important}
+.detail-facts b{white-space:normal;overflow-wrap:anywhere}
 .bottom-zone.discover-zone .actions{transform:none!important}
 .bottom-zone.discover-zone .ios-glass-nav{top:auto!important}
 
