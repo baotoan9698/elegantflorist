@@ -24,6 +24,9 @@ function IconButton({children, label, className='', onClick}) { return <button a
 
 function Garden({onOpenProduct,items=gardenProducts}){
  const [category,setCategory]=useState('Tất cả');
+ const filterDrag=useRef(null),filterMoved=useRef(false);
+ const startFilterDrag=e=>{if(e.pointerType!=='mouse'||e.button!==0)return;filterMoved.current=false;filterDrag.current={x:e.clientX,left:e.currentTarget.scrollLeft}};
+ const moveFilterDrag=e=>{const start=filterDrag.current;if(!start)return;const distance=e.clientX-start.x;if(Math.abs(distance)>5){filterMoved.current=true;e.currentTarget.setPointerCapture(e.pointerId)}if(filterMoved.current)e.currentTarget.scrollLeft=start.left-distance};
  const products=category==='Tất cả'?items:items.filter(item=>getProductCategories(item).includes(category));
  const gardenCategories=['Tất cả',...new Set(items.flatMap(getProductCategories))];
  return <section className="garden-view">
@@ -31,7 +34,7 @@ function Garden({onOpenProduct,items=gardenProducts}){
     <div><span>Our collection</span><h1>Garden</h1></div>
     <button className="garden-search" aria-label="Tìm kiếm"><Search/></button>
    </div>
-   <div className="garden-filters" aria-label="Danh mục hoa">
+   <div className="garden-filters" aria-label="Danh mục hoa" tabIndex={0} onPointerDown={startFilterDrag} onPointerMove={moveFilterDrag} onPointerUp={()=>{filterDrag.current=null}} onPointerCancel={()=>{filterDrag.current=null}} onClickCapture={e=>{if(filterMoved.current){e.preventDefault();e.stopPropagation();filterMoved.current=false}}}>
     {gardenCategories.map(item=><button key={item} className={category===item?'active':''} onClick={()=>setCategory(item)}>{item}</button>)}
    </div>
    <div className="product-grid">
@@ -168,15 +171,18 @@ function App({catalog=null}){
 }
 function Storefront(){
  const [catalog,setCatalog]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(!!supabase);
+ const firstLoad=useRef(true);
+ useEffect(()=>{if(loading)return;const cover=document.getElementById('startup-cover');if(!cover)return;const frame=requestAnimationFrame(()=>cover.classList.add('ready'));const timer=setTimeout(()=>cover.remove(),1000);return()=>{cancelAnimationFrame(frame);clearTimeout(timer)}},[loading]);
  async function load(){
   if(!supabase)return;
   setError('');
-  try{const {data,error}=await supabase.from('products').select('*').eq('published',true).order('created_at',{ascending:false});if(error)throw error;setCatalog(data.map(productView))}catch(error){setError(error.message)}finally{setLoading(false)}
+  try{const {data,error}=await supabase.from('products').select('*').eq('published',true).order('created_at',{ascending:false});if(error)throw error;const products=data.map(productView);if(firstLoad.current){firstLoad.current=false;const lead=products.find(item=>item.featured)||products[0];if(lead)await Promise.race([new Promise(resolve=>{const image=new Image();image.onload=()=>{image.decode().catch(()=>{}).then(resolve)};image.onerror=resolve;image.src=lead.image}),new Promise(resolve=>setTimeout(resolve,3500))])}setCatalog(products)}catch(error){setError(error.message)}finally{setLoading(false)}
  }
  useEffect(()=>{load();if(!supabase)return;const refresh=()=>load();window.addEventListener('focus',refresh);return()=>window.removeEventListener('focus',refresh)},[]);
- if(loading)return <main className="catalog-status">Đang tải bộ sưu tập…</main>;
+ if(loading)return <main className="catalog-status" aria-busy="true" aria-label="Đang tải bộ sưu tập"/>;
  if(error)return <main className="catalog-status"><p>Không thể tải sản phẩm. Vui lòng thử lại.</p><button onClick={load}>Tải lại</button></main>;
  if(catalog&&!catalog.length)return <main className="catalog-status"><h1>Elégant Florist</h1><p>Bộ sưu tập đang được cập nhật.</p><a href="/admin">Quản lý sản phẩm</a></main>;
  return <App catalog={catalog}/>;
 }
+if(window.location.pathname.startsWith('/admin'))document.getElementById('startup-cover')?.remove();
 createRoot(document.getElementById('root')).render(window.location.pathname.startsWith('/admin')?<Admin/>:<Storefront/>);

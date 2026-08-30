@@ -148,9 +148,16 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   width:100%;
   overflow-x:auto;
   padding:1px 1px 3px;
-  scrollbar-width:none;
+  min-width:0;
+  scrollbar-width:thin;
+  scrollbar-color:#83bdd0 transparent;
+  touch-action:pan-x pan-y;
+  user-select:none;
+  cursor:grab;
 }
-.garden-filters::-webkit-scrollbar{display:none}
+.garden-filters::-webkit-scrollbar{height:4px}
+.garden-filters::-webkit-scrollbar-thumb{background:#83bdd0;border-radius:4px}
+.garden-filters:active{cursor:grabbing}
 .garden-filters button{
   flex:0 0 auto;
   padding:7px 12px;
@@ -383,6 +390,7 @@ nav.ios-glass-nav:after{display:none!important}nav.ios-glass-nav{box-shadow:inse
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
 }
+.garden-filters{scroll-behavior:auto}
 .preview-card{
   transition:transform .7s cubic-bezier(.16,.74,.18,1)!important;
 }
