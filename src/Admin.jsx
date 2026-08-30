@@ -3,6 +3,7 @@ import {supabase, slugify} from './supabase';
 import {flowers, gardenProducts} from './sampleCatalog';
 import categoryMigration from '../supabase/categories.sql?raw';
 import multiCategoryMigration from '../supabase/product-categories.sql?raw';
+import deleteCategoryMigration from '../supabase/delete-category.sql?raw';
 import {getProductCategories} from './productCategories';
 import './admin.css';
 
@@ -61,6 +62,19 @@ export default function Admin(){
  function edit(row){
   previewUrls.current.forEach(url=>URL.revokeObjectURL(url));previewUrls.current=[];
   setForm(row?{...row,categories:getProductCategories(row),tags:row.tags.join(', ')}:empty());setPictures(row?row.images.map(url=>({url})):[]);setMessage('');
+ }
+ async function deleteCategory(item){
+  if(busy)return;
+  if(!window.confirm(`Xóa danh mục “${item.name}”? Chỉ xóa được khi không còn sản phẩm sử dụng danh mục này.`))return;
+  setBusy(true);setMessage('');
+  try{
+   const {error}=await supabase.rpc('delete_flower_category',{category_id:item.id});
+   if(error)throw error;
+   setCategories(current=>current.filter(category=>category.id!==item.id));
+   setForm(current=>({...current,categories:current.categories.filter(name=>name!==item.name)}));
+   setMessage(`Đã xóa danh mục “${item.name}”. Không xóa sản phẩm hoặc ảnh.`);
+   await load();
+  }catch(error){setMessage(error.code==='PGRST202'?'Cần chạy SQL bật xóa danh mục ở phần bên dưới trước khi sử dụng.':`Chưa xóa được: ${error.message}`)}finally{setBusy(false)}
  }
  async function login(event){
   event.preventDefault();setBusy(true);setMessage('');
@@ -136,6 +150,7 @@ export default function Admin(){
    checking?<p>Đang kiểm tra đăng nhập…</p>:!session?<form className="admin-panel admin-login" onSubmit={login}><h2>Đăng nhập admin</h2><label>Email<input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label>Mật khẩu<input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/></label><button disabled={busy}>Đăng nhập</button></form>:<>
     <div className="admin-toolbar"><span>{session.user.email}</span><button disabled={busy} onClick={async()=>{await supabase.auth.signOut();setAllowed(false);setProducts([]);edit(null)}}>Đăng xuất</button></div>
     {allowed&&<section className="admin-panel admin-categories"><h2>Danh mục sản phẩm</h2><p>Tạo danh mục trước, sau đó chọn danh mục khi thêm hoặc sửa sản phẩm. Danh mục có sản phẩm xuất bản sẽ xuất hiện trong bộ lọc Garden.</p><form onSubmit={createCategory} className="admin-category-form"><label>Tên danh mục mới<input value={categoryName} maxLength={80} required placeholder="Ví dụ: Hoa Sinh Nhật" disabled={busy||!categoriesReady} onChange={e=>setCategoryName(e.target.value)}/></label><button disabled={busy||!categoriesReady||!categoryName.trim()}>＋ Tạo danh mục</button><button type="button" disabled={busy} onClick={loadCategories}>Tải lại danh mục</button></form>{categoryError&&<div className="admin-category-warning" role="alert"><p>{categoryError}</p><details><summary>SQL thiết lập danh mục — chạy một lần trong Supabase SQL Editor</summary><textarea aria-label="SQL thiết lập danh mục" readOnly value={categoryMigration} rows={10}/></details></div>}<div className="admin-category-chips" aria-label="Danh mục hiện có">{categoryOptions.map(name=><button key={name} type="button" disabled={busy} aria-pressed={form.categories.includes(name)} onClick={()=>toggleCategory(name)}>{name}<small>{products.filter(product=>getProductCategories(product).includes(name)).length} sản phẩm</small></button>)}</div></section>}
+    {allowed&&<section className="admin-panel" style={{marginBottom:20}}><h3>Xóa danh mục</h3><p>Chuyển sản phẩm sang danh mục khác và lưu trước khi xóa. Bao gồm cả sản phẩm nháp và đã ẩn.</p><div className="admin-category-chips">{categories.map(item=><button type="button" key={item.id} disabled={busy} aria-label={`Xóa danh mục ${item.name}`} onClick={()=>deleteCategory(item)}>× Xóa {item.name}</button>)}</div><details><summary>Thiết lập quyền xóa — chạy SQL này một lần trong Supabase</summary><textarea aria-label="SQL bật xóa danh mục" readOnly value={deleteCategoryMigration} rows={10}/></details></section>}
     {allowed&&!multiCategoryReady&&<section className="admin-panel admin-category-warning" style={{marginBottom:20}}><h3>Bật nhiều danh mục trên Supabase</h3><p>Chạy SQL dưới đây một lần, sau đó bấm Kiểm tra lại. Danh mục cũ được giữ nguyên; trước khi nâng cấp chỉ có thể lưu một lựa chọn.</p><details><summary>SQL nâng cấp nhiều danh mục</summary><textarea aria-label="SQL nâng cấp nhiều danh mục" readOnly value={multiCategoryMigration} rows={7}/></details><button type="button" disabled={busy} onClick={checkMultiCategory}>Kiểm tra lại nhiều danh mục</button></section>}
     {allowed&&<section className="admin-panel" style={{marginBottom:20}}><h2>Dữ liệu mẫu trước đây</h2><p>Nhập 18 sản phẩm và ảnh cũ, giữ tên/giá/mô tả demo và xuất bản lên cửa hàng. Bỏ qua sản phẩm có cùng đường dẫn, không ghi đè nội dung đã sửa. Ba mẫu nổi bật sẽ xuất hiện trong Discover.</p><button disabled={busy} onClick={importSamples}>{busy?'Đang xử lý…':'Nhập 18 sản phẩm mẫu cũ'}</button></section>}
     {allowed&&<div className="admin-layout"><section className="admin-panel admin-list"><button disabled={busy} onClick={()=>edit(null)}>＋ Sản phẩm mới</button><p>{products.length} sản phẩm</p>{products.map(row=><button disabled={busy} className={`admin-product ${form.id===row.id?'selected':''}`} key={row.id} onClick={()=>edit(row)}>{row.images[0]&&<img src={row.images[0]} alt=""/>}<span><strong>{row.name}</strong><small>{row.published?'Đang bán':'Bản nháp / Đã ẩn'}</small></span></button>)}{!products.length&&<p>Chưa có sản phẩm. Thêm sản phẩm đầu tiên bên phải.</p>}</section>
