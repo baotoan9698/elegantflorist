@@ -19,6 +19,7 @@ create table public.products (
   slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   name text not null check (length(trim(name)) > 0),
   category text not null default 'Hoa Mix',
+  categories text[] not null default '{}',
   price_vnd bigint not null default 0 check (price_vnd >= 0),
   origin text not null default '',
   tagline text not null default '',
